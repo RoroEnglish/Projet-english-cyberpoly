@@ -231,6 +231,42 @@
       text-align: center;
     }
 
+    /* BOUTON RÈGLES (PDF) */
+    .rules-box {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      background: rgba(0,0,0,0.35);
+      border: 1px solid rgba(255,244,229,0.3);
+      padding: 10px 16px;
+      border-radius: 16px;
+
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      z-index: 999;
+      text-decoration: none;
+    }
+
+    .rules-box:hover {
+      background: rgba(0,0,0,0.5);
+      transform: translateY(-2px);
+    }
+
+    .rules-icon {
+      width: 32px;
+      height: 32px;
+    }
+
+    .rules-label {
+      font-size: 1rem;
+      color: var(--cream);
+      font-weight: 600;
+    }
+
     /* RESPONSIVE */
     @media (max-width: 600px) {
       body {
@@ -295,6 +331,12 @@
   </style>
 </head>
 <body>
+
+  <!-- BOUTON FIXE POUR OUVRIR LE PDF DES RÈGLES -->
+  <a href="rules-of-the-game-cyberpoly.pdf" target="_blank" class="rules-box">
+    <img src="images/fichier-regle.png" alt="Règles du jeu Cyberpoly" class="rules-icon">
+    <span class="rules-label">Règles du jeu</span>
+  </a>
 
   <div class="app">
 
