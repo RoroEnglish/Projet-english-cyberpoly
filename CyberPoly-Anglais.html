@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Cyberpoly - Bonus / Malus Quiz</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Lilita One for title + Inter for text -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg-dark: #05010a;
+      --purple-main: #c25aa8;
+      --purple-deep: #893a7b;
+      --cream: #fff4e5;
+      --cream-soft: #ffe9d4;
+      --text-muted: #f0d7f1;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #32102f 0, var(--bg-dark) 45%, #020005 100%);
+      color: var(--cream);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app {
+      max-width: 900px;
+      width: 100%;
+      padding: 16px;
+    }
+
+    /* LOGO */
+    .logo-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .logo {
+      max-width: 420px;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 10px 25px rgba(0,0,0,0.65));
+    }
+
+    /* TITLES */
+    .title-text {
+      text-align: center;
+      font-family: "Lilita One", system-ui, -apple-system, sans-serif;
+      font-size: 2.1rem;
+      margin: 0;
+      color: var(--cream);
+      letter-spacing: 0.04em;
+    }
+
+    .subtitle {
+      text-align: center;
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin: 4px 0 20px 0;
+    }
+
+    /* MAIN CARD */
+    .card {
+      background: radial-gradient(circle at top, #d874bb 0, var(--purple-main) 45%, var(--purple-deep) 100%);
+      border-radius: 32px;
+      padding: 38px 32px 32px 32px;
+      border: 2px solid rgba(0,0,0,0.45);
+      box-shadow: 0 22px 60px rgba(0,0,0,0.75);
+      margin-bottom: 22px;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    /* BUTTONS */
+    .mode-buttons {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 22px;
+    }
+
+    button {
+      border-radius: 999px;
+      border: none;
+      padding: 16px 32px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      transition: transform 0.09s ease, box-shadow 0.15s ease, background 0.15s ease, color 0.15s ease;
+      font-family: inherit;
+    }
+
+    button:active {
+      transform: translateY(1px) scale(0.97);
+      box-shadow: none;
+    }
+
+    /* BONUS = GREEN */
+    .btn-bonus {
+      background: linear-gradient(135deg, #16a34a, #4ade80);
+      color: #eafff1;
+      box-shadow: 0 12px 28px rgba(16, 185, 129, 0.45);
+    }
+
+    .btn-bonus:hover {
+      background: linear-gradient(135deg, #15803d, #22c55e);
+    }
+
+    /* MALUS = RED */
+    .btn-malus {
+      background: linear-gradient(135deg, #b91c1c, #f97373);
+      color: #fff5f5;
+      box-shadow: 0 12px 28px rgba(185, 28, 28, 0.55);
+      border: 1px solid rgba(248, 250, 252, 0.16);
+    }
+
+    .btn-malus:hover {
+      background: linear-gradient(135deg, #991b1b, #ef4444);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--cream-soft);
+      border-radius: 999px;
+      padding: 12px 22px;
+      font-size: 1rem;
+      border: 1px solid rgba(255, 244, 229, 0.45);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.55);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(0,0,0,0.18);
+    }
+
+    /* QUESTION / RESULT */
+    .tag {
+      text-align: center;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: rgba(255,244,229,0.85);
+      margin-bottom: 10px;
+    }
+
+    .question-text {
+      font-size: 1.3rem;
+      margin-bottom: 10px;
+      text-align: center;
+      font-weight: 700;
+      color: var(--cream);
+    }
+
+    .question-note {
+      font-size: 0.95rem;
+      color: var(--cream-soft);
+      text-align: center;
+      margin-bottom: 18px;
+    }
+
+    .answer-area {
+      margin-top: 10px;
+    }
+
+    .options-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: stretch;
+    }
+
+    .option-btn {
+      width: 100%;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,244,229,0.5);
+      background: rgba(0,0,0,0.13);
+      color: var(--cream);
+      font-size: 1.05rem;
+      margin-top: 8px;
+      box-sizing: border-box;
+    }
+
+    input[type="text"]::placeholder {
+      color: rgba(255,244,229,0.65);
+    }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #ffe3c0;
+      box-shadow: 0 0 0 2px rgba(255,227,192,0.7);
+      background: rgba(0,0,0,0.25);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .feedback {
+      font-size: 1.15rem;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+
+    .correct-answer {
+      font-size: 0.95rem;
+      color: var(--cream-soft);
+      text-align: center;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      body {
+        align-items: flex-start;
+      }
+
+      .app {
+        padding: 10px;
+      }
+
+      .card {
+        padding: 26px 18px 22px 18px;
+        border-radius: 24px;
+        margin-bottom: 16px;
+      }
+
+      .logo {
+        max-width: 280px;
+      }
+
+      .title-text {
+        font-size: 1.7rem;
+      }
+
+      .subtitle {
+        font-size: 0.9rem;
+        margin-bottom: 14px;
+      }
+
+      .question-text {
+        font-size: 1.1rem;
+      }
+
+      .question-note {
+        font-size: 0.9rem;
+      }
+
+      button {
+        width: 100%;
+        padding: 14px 18px;
+        font-size: 1rem;
+      }
+
+      .mode-buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      input[type="text"] {
+        font-size: 1rem;
+        padding: 12px 14px;
+      }
+
+      .feedback {
+        font-size: 1.05rem;
+      }
+
+      .correct-answer {
+        font-size: 0.9rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app">
+
+    <div class="logo-wrapper">
+      <!-- Make sure LOGO-fonce.png is in the same folder -->
+      <img src="C:\Users\romai\Downloads\LOGO-fonce.png" alt="Cyberpoly logo" class="logo">
+    </div>
+
+    <!-- MODE SELECTION SCREEN -->
+    <div id="modeSection">
+      <div class="card">
+        <p class="title-text">Cyberpoly Quiz</p>
+        <p class="subtitle">Choose BONUS or MALUS, answer a question and see your fate 🎲</p>
+
+        <div style="font-size:1.1rem; text-align:center; margin-bottom:10px;">
+          Choose a mode:
+        </div>
+
+        <div class="mode-buttons">
+          <button class="btn-bonus" onclick="startGame('bonus')">✨ BONUS Mode</button>
+          <button class="btn-malus" onclick="startGame('malus')">⚡ MALUS Mode</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUIZ SCREEN -->
+    <div id="quizSection" style="display:none;">
+      <div class="card" id="questionCard">
+        <div class="tag" id="questionTypeTag">Random question</div>
+        <div class="question-text" id="questionText"></div>
+        <div class="question-note" id="questionNote"></div>
+
+        <!-- QUIZ A/B/C -->
+        <div id="quizAnswerArea" class="answer-area" style="display:none;">
+          <div class="options-grid">
+            <button class="btn-secondary option-btn" id="optionA" onclick="answerQuiz('A')"></button>
+            <button class="btn-secondary option-btn" id="optionB" onclick="answerQuiz('B')"></button>
+            <button class="btn-secondary option-btn" id="optionC" onclick="answerQuiz('C')"></button>
+          </div>
+        </div>
+
+        <!-- TRUE / FALSE -->
+        <div id="tfAnswerArea" class="answer-area" style="display:none;">
+          <div class="options-grid">
+            <button class="btn-bonus option-btn" onclick="answerTF(true)">✅ True</button>
+            <button class="btn-malus option-btn" onclick="answerTF(false)">❌ False</button>
+          </div>
+        </div>
+
+        <!-- SIMPLE TEXT -->
+        <div id="simpleAnswerArea" class="answer-area" style="display:none;">
+          <input
+            type="text"
+            id="answerInput"
+            placeholder="Your answer..."
+            autocomplete="off"
+            onkeydown="if(event.key === 'Enter') answerSimple()"
+          >
+          <div class="actions">
+            <button class="btn-bonus" onclick="answerSimple()">Submit</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULT SCREEN -->
+      <div class="card" id="resultCard" style="display:none;">
+        <div class="tag">Result</div>
+        <div id="resultMessage" class="feedback"></div>
+        <div id="resultModeText" class="feedback"></div>
+        <div id="resultCorrectAnswer" class="correct-answer"></div>
+
+        <div class="actions">
+          <button class="btn-secondary" onclick="newRandomQuestion()">🎲 New question</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const allQuestions = [
+
+      /* QUIZ */
+      /* Beginner */
+      {
+        kind: "quiz",
+        question: "Which website is used to watch videos?",
+        options: { A: "Wikipedia", B: "YouTube", C: "Excel" },
+        correctOption: "B"
+      },
+      {
+        kind: "quiz",
+        question: "What can you do with Google?",
+        options: {
+          A: "Search for information",
+          B: "Make pizzas",
+          C: "Plant flowers"
+        },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "Which device allows you to access the internet?",
+        options: { A: "Phone", B: "Refrigerator", C: "Lamp" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "What symbol often represents Wi-Fi?",
+        options: { A: "Waves", B: "A star", C: "A hammer" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "Where do people upload pictures?",
+        options: { A: "Instagram", B: "PowerPoint", C: "Spotify" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "Which button starts a video?",
+        options: { A: "Play", B: "Pause", C: "Stop" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "Where can you send emails?",
+        options: { A: "Gmail", B: "Netflix", C: "TikTok" },
+        correctOption: "A"
+      },
+
+      /* Intermediate */
+      {
+        kind: "quiz",
+        question: "Which software protects a device?",
+        options: { A: "Antivirus", B: "Keyboard", C: "Car alarm" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "What is a VPN used for?",
+        options: {
+          A: "Watch TV",
+          B: "Browse more anonymously",
+          C: "Buy a computer"
+        },
+        correctOption: "B"
+      },
+      {
+        kind: "quiz",
+        question: "Which platform allows video calls?",
+        options: { A: "Discord", B: "VLC", C: "Paint" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "What does HTTPS mean?",
+        options: { A: "Secure website", B: "Closed page", C: "Message deleted" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "Which file type is an image?",
+        options: { A: ".jpg", B: ".exe", C: ".mp3" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "Which platform is for short videos?",
+        options: { A: "TikTok", B: "Drive", C: "Word" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "What is malware?",
+        options: {
+          A: "A playlist",
+          B: "Malicious software",
+          C: "An emoji"
+        },
+        correctOption: "B"
+      },
+
+      /* Advanced */
+      {
+        kind: "quiz",
+        question: "What is the name of an attack that locks a system for ransom?",
+        options: { A: "Spam", B: "Ransomware", C: "Backup" },
+        correctOption: "B"
+      },
+      {
+        kind: "quiz",
+        question: "Which technique tests thousands of passwords automatically?",
+        options: { A: "Brute force", B: "Antivirus", C: "Cloud" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "Which protocol manages website addresses?",
+        options: { A: "DNS", B: "USB", C: "HDMI" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "What does an encrypted connection mean?",
+        options: {
+          A: "Impossible to understand without a key",
+          B: "Visible to everyone",
+          C: "Broken"
+        },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "Which tool analyzes network traffic for threats?",
+        options: { A: "Firewall", B: "Keyboard", C: "Webcam" },
+        correctOption: "A"
+      },
+      {
+        kind: "quiz",
+        question: "What is cloud computing?",
+        options: {
+          A: "Online storage",
+          B: "A steam machine",
+          C: "A robot"
+        },
+        correctOption: "A"
+      },
+
+      /* TRUE / FALSE */
+      /* Beginner */
+      {
+        kind: "tf",
+        question: "A password should be hard to guess.",
+        correctBool: true
+      },
+      {
+        kind: "tf",
+        question: "Cookies allow websites to remember preferences.",
+        correctBool: true
+      },
+      {
+        kind: "tf",
+        question: "All messages online are true.",
+        correctBool: false
+      },
+      {
+        kind: "tf",
+        question: "You can get hacked by clicking a dangerous link.",
+        correctBool: true
+      },
+      {
+        kind: "tf",
+        question: "Public Wi-Fi is always safe.",
+        correctBool: false
+      },
+      {
+        kind: "tf",
+        question: "An email address always contains '@'.",
+        correctBool: true
+      },
+      {
+        kind: "tf",
+        question: "A deleted video disappears forever everywhere.",
+        correctBool: false
+      },
+
+      /* Intermediate */
+      {
+        kind: "tf",
+        question: "Phishing is a scam that steals data.",
+        correctBool: true
+      },
+      {
+        kind: "tf",
+        question: "HTTPS means a website is potentially safer.",
+        correctBool: true
+      },
+      {
+        kind: "tf",
+        question: "An antivirus can stop 100% of threats.",
+        correctBool: false
+      },
+      {
+        kind: "tf",
+        question: "Two-factor authentication protects accounts better.",
+        correctBool: true
+      },
+      {
+        kind: "tf",
+        question: "A website may sell your personal data.",
+        correctBool: true
+      },
+      {
+        kind: "tf",
+        question: "'Password123' is a secure password.",
+        correctBool: false
+      },
+      {
+        kind: "tf",
+        question: "Smartphones cannot get viruses.",
+        correctBool: false
+      },
+
+      /* Advanced */
+      {
+        kind: "tf",
+        question: "Ransomware encrypts data to demand money.",
+        correctBool: true
+      },
+      {
+        kind: "tf",
+        question: "A DDoS attack overloads a server.",
+        correctBool: true
+      },
+      {
+        kind: "tf",
+        question: "A firewall is used to decorate a computer.",
+        correctBool: false
+      },
+      {
+        kind: "tf",
+        question: "Zero-day attacks exploit unknown vulnerabilities.",
+        correctBool: true
+      },
+      {
+        kind: "tf",
+        question: "Encryption prevents all hacking completely.",
+        correctBool: false
+      },
+      {
+        kind: "tf",
+        question: "A VPN can hide your IP address.",
+        correctBool: true
+      },
+
+      /* SIMPLE QUESTIONS */
+      /* Beginner */
+      {
+        kind: "simple",
+        question: "What do you call a funny picture shared online?",
+        acceptedAnswers: ["meme"],
+        displayAnswer: "A meme"
+      },
+      {
+        kind: "simple",
+        question: "How do you send a private message?",
+        acceptedAnswers: ["messaging", "dm", "private message"],
+        displayAnswer: "Using messaging / DM"
+      },
+      {
+        kind: "simple",
+        question: "What is an email address used for?",
+        acceptedAnswers: ["send", "receive", "messages", "mail"],
+        displayAnswer: "Sending and receiving messages"
+      },
+      {
+        kind: "simple",
+        question: "What is an unwanted message called?",
+        acceptedAnswers: ["spam"],
+        displayAnswer: "Spam"
+      },
+      {
+        kind: "simple",
+        question: "What protects an account?",
+        acceptedAnswers: ["password", "strong password"],
+        displayAnswer: "A strong password"
+      },
+      {
+        kind: "simple",
+        question: "What should you do before accepting a friend request?",
+        acceptedAnswers: ["check"],
+        displayAnswer: "Check who it is"
+      },
+      {
+        kind: "simple",
+        question: "What are headphones used for?",
+        acceptedAnswers: ["listen", "sound", "music"],
+        displayAnswer: "Listening to sound"
+      },
+
+      /* Intermediate */
+      {
+        kind: "simple",
+        question: "What do you call a file containing text?",
+        acceptedAnswers: ["document", "text file"],
+        displayAnswer: "A document"
+      },
+      {
+        kind: "simple",
+        question: "What is browser history for?",
+        acceptedAnswers: ["review", "visited sites", "history"],
+        displayAnswer: "Reviewing visited websites"
+      },
+      {
+        kind: "simple",
+        question: "What should you do if an email looks suspicious?",
+        acceptedAnswers: ["delete", "don't click", "ignore"],
+        displayAnswer: "Don't click, delete"
+      },
+      {
+        kind: "simple",
+        question: "What do you call a copy of a file?",
+        acceptedAnswers: ["backup", "save"],
+        displayAnswer: "A backup"
+      },
+      {
+        kind: "simple",
+        question: "What’s the difference between Wi-Fi and the Internet?",
+        acceptedAnswers: ["wifi", "internet", "connection", "network"],
+        displayAnswer: "Wi-Fi = connection method, Internet = the network"
+      },
+      {
+        kind: "simple",
+        question: "What do you call a fake message that looks official?",
+        acceptedAnswers: ["phishing", "scam"],
+        displayAnswer: "Phishing"
+      },
+      {
+        kind: "simple",
+        question: "What does an update do?",
+        acceptedAnswers: ["fix", "improve", "secure", "update"],
+        displayAnswer: "Fixes, improves, and secures"
+      },
+
+      /* Advanced */
+      {
+        kind: "simple",
+        question: "What do you call software installed without permission?",
+        acceptedAnswers: ["malware"],
+        displayAnswer: "Malware"
+      },
+      {
+        kind: "simple",
+        question: "What does analyzing a network mean?",
+        acceptedAnswers: ["check", "analysis", "traffic"],
+        displayAnswer: "Checking traffic to detect threats"
+      },
+      {
+        kind: "simple",
+        question: "What is a security vulnerability?",
+        acceptedAnswers: ["weakness", "vulnerability"],
+        displayAnswer: "A weakness in a system"
+      },
+      {
+        kind: "simple",
+        question: "What do you call a malicious attachment?",
+        acceptedAnswers: ["virus", "malware"],
+        displayAnswer: "A virus / malware"
+      },
+      {
+        kind: "simple",
+        question: "What is a server?",
+        acceptedAnswers: ["computer", "stores", "distributes"],
+        displayAnswer: "A computer that stores and distributes data"
+      },
+      {
+        kind: "simple",
+        question: "Why use a different password for each account?",
+        acceptedAnswers: ["avoid", "hacking", "multiple accounts"],
+        displayAnswer: "To avoid one hack affecting multiple accounts"
+      }
+    ];
+
+    let mode = "bonus";
+    let currentQuestion = null;
+
+    const modeSection = document.getElementById("modeSection");
+    const quizSection = document.getElementById("quizSection");
+    const questionCard = document.getElementById("questionCard");
+    const resultCard = document.getElementById("resultCard");
+
+    const questionTypeTagEl = document.getElementById("questionTypeTag");
+    const questionTextEl = document.getElementById("questionText");
+    const questionNoteEl = document.getElementById("questionNote");
+
+    const quizAnswerArea = document.getElementById("quizAnswerArea");
+    const tfAnswerArea = document.getElementById("tfAnswerArea");
+    const simpleAnswerArea = document.getElementById("simpleAnswerArea");
+
+    const optionAEl = document.getElementById("optionA");
+    const optionBEl = document.getElementById("optionB");
+    const optionCEl = document.getElementById("optionC");
+
+    const answerInputEl = document.getElementById("answerInput");
+
+    const resultMessageEl = document.getElementById("resultMessage");
+    const resultModeTextEl = document.getElementById("resultModeText");
+    const resultCorrectAnswerEl = document.getElementById("resultCorrectAnswer");
+
+    function normalize(str) {
+      return str
+        .toString()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase()
+        .trim();
+    }
+
+    function startGame(selectedMode) {
+      mode = selectedMode;
+      modeSection.style.display = "none";
+      quizSection.style.display = "block";
+      newRandomQuestion();
+    }
+
+    function newRandomQuestion() {
+      currentQuestion =
+        allQuestions[Math.floor(Math.random() * allQuestions.length)];
+
+      questionTextEl.textContent = currentQuestion.question;
+
+      quizAnswerArea.style.display = "none";
+      tfAnswerArea.style.display = "none";
+      simpleAnswerArea.style.display = "none";
+
+      if (currentQuestion.kind === "quiz") {
+        questionTypeTagEl.textContent = "Quiz • A, B or C";
+        questionNoteEl.textContent = "Choose the correct answer.";
+        quizAnswerArea.style.display = "block";
+
+        optionAEl.textContent = "A) " + currentQuestion.options.A;
+        optionBEl.textContent = "B) " + currentQuestion.options.B;
+        optionCEl.textContent = "C) " + currentQuestion.options.C;
+      } else if (currentQuestion.kind === "tf") {
+        questionTypeTagEl.textContent = "True / False";
+        questionNoteEl.textContent = "Pick True or False.";
+        tfAnswerArea.style.display = "block";
+      } else {
+        questionTypeTagEl.textContent = "Simple question";
+        questionNoteEl.textContent = "Type your answer in a few words.";
+        simpleAnswerArea.style.display = "block";
+        answerInputEl.value = "";
+        answerInputEl.focus();
+      }
+
+      questionCard.style.display = "block";
+      resultCard.style.display = "none";
+    }
+
+    function answerQuiz(optionLetter) {
+      checkAnswer({ type: "quiz", userOption: optionLetter });
+    }
+
+    function answerTF(boolValue) {
+      checkAnswer({ type: "tf", userBool: boolValue });
+    }
+
+    function answerSimple() {
+      const raw = answerInputEl.value;
+      if (!raw.trim()) {
+        alert("Please type an answer 😉");
+        return;
+      }
+      checkAnswer({ type: "simple", userText: raw });
+    }
+
+    function checkAnswer(payload) {
+      let isCorrect = false;
+      let correctText = "";
+
+      if (currentQuestion.kind === "quiz") {
+        isCorrect =
+          payload.userOption === currentQuestion.correctOption;
+        const opt = currentQuestion.correctOption;
+        correctText = `${opt}) ${currentQuestion.options[opt]}`;
+      } else if (currentQuestion.kind === "tf") {
+        isCorrect = payload.userBool === currentQuestion.correctBool;
+        correctText = currentQuestion.correctBool ? "True" : "False";
+      } else if (currentQuestion.kind === "simple") {
+        const user = normalize(payload.userText);
+        const accepted = currentQuestion.acceptedAnswers.map(a =>
+          normalize(a)
+        );
+        isCorrect = accepted.some(a => user.includes(a) || a.includes(user));
+        correctText = currentQuestion.displayAnswer;
+      }
+
+      let modeText = "";
+      if (mode === "bonus") {
+        modeText = isCorrect
+          ? "Well done, you may choose any tile you want!"
+          : "Loser, the bonus stays here.";
+      } else {
+        modeText = isCorrect
+          ? "Lucky this time, but I’ll get you next time!"
+          : "You lose one of your tiles, shame!";
+      }
+
+      resultMessageEl.textContent = isCorrect
+        ? "✅ Correct answer!"
+        : "❌ Wrong answer.";
+      resultModeTextEl.textContent = modeText;
+      resultCorrectAnswerEl.textContent =
+        "Correct answer: " + correctText;
+
+      questionCard.style.display = "none";
+      resultCard.style.display = "block";
+    }
+  </script>
+
+</body>
+</html>
