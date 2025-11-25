@@ -333,7 +333,7 @@
 <body>
 
   <!-- BOUTON FIXE POUR OUVRIR LE PDF DES RÈGLES -->
-  <a href="rules-of-the-game-cyberpoly.pdf" target="_blank" class="rules-box">
+  <a href="rules-of-the-game-cyberpoly.pdf" target="_blank" class="rules-box" id="rulesBox">
     <img src="fichier-regle.png" alt="Règles du jeu Cyberpoly" class="rules-icon">
     <span class="rules-label">Règles du jeu</span>
   </a>
@@ -808,6 +808,7 @@
     const quizSection = document.getElementById("quizSection");
     const questionCard = document.getElementById("questionCard");
     const resultCard = document.getElementById("resultCard");
+    const rulesBox = document.getElementById("rulesBox"); // 👈 récupère le bouton règles
 
     const questionTypeTagEl = document.getElementById("questionTypeTag");
     const questionTextEl = document.getElementById("questionText");
@@ -840,6 +841,7 @@
       mode = selectedMode;
       modeSection.style.display = "none";
       quizSection.style.display = "block";
+      if (rulesBox) rulesBox.style.display = "none"; // 👈 cache le bouton règles
       newRandomQuestion();
     }
 
