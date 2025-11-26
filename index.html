@@ -231,7 +231,7 @@
       text-align: center;
     }
 
-    /* BOUTON RÈGLES (PDF) */
+    /* RULES BUTTON (PDF) */
     .rules-box {
       position: fixed;
       top: 20px;
@@ -239,12 +239,10 @@
       display: flex;
       align-items: center;
       gap: 10px;
-
       background: rgba(0,0,0,0.35);
       border: 1px solid rgba(255,244,229,0.3);
       padding: 10px 16px;
       border-radius: 16px;
-
       cursor: pointer;
       transition: background 0.2s ease, transform 0.1s ease;
       z-index: 999;
@@ -265,6 +263,13 @@
       font-size: 1rem;
       color: var(--cream);
       font-weight: 600;
+    }
+
+    /* AI IMAGE */
+    #aiImageWrapper img {
+      max-width: 100%;
+      border-radius: 16px;
+      box-shadow: 0 14px 30px rgba(0,0,0,0.6);
     }
 
     /* RESPONSIVE */
@@ -332,10 +337,10 @@
 </head>
 <body>
 
-  <!-- BOUTON FIXE POUR OUVRIR LE PDF DES RÈGLES -->
+  <!-- FIXED BUTTON TO OPEN THE PDF RULES -->
   <a href="rules-of-the-game-cyberpoly.pdf" target="_blank" class="rules-box" id="rulesBox">
-    <img src="fichier-regle.png" alt="Règles du jeu Cyberpoly" class="rules-icon">
-    <span class="rules-label">Règles du jeu</span>
+    <img src="fichier-regle.png" alt="Cyberpoly game rules" class="rules-icon">
+    <span class="rules-label">Game rules</span>
   </a>
 
   <div class="app">
@@ -369,6 +374,11 @@
         <div class="question-text" id="questionText"></div>
         <div class="question-note" id="questionNote"></div>
 
+        <!-- IMAGE FOR AI / NOT AI QUESTIONS -->
+        <div id="aiImageWrapper" style="display:none; text-align:center; margin-bottom:16px;">
+          <img id="aiImage" src="" alt="Question image">
+        </div>
+
         <!-- QUIZ A/B/C -->
         <div id="quizAnswerArea" class="answer-area" style="display:none;">
           <div class="options-grid">
@@ -383,6 +393,14 @@
           <div class="options-grid">
             <button class="btn-bonus option-btn" onclick="answerTF(true)">✅ True</button>
             <button class="btn-malus option-btn" onclick="answerTF(false)">❌ False</button>
+          </div>
+        </div>
+
+        <!-- AI OR NOT AI -->
+        <div id="aiAnswerArea" class="answer-area" style="display:none;">
+          <div class="options-grid">
+            <button class="btn-bonus option-btn" onclick="answerAI(true)">🤖 AI-generated</button>
+            <button class="btn-secondary option-btn" onclick="answerAI(false)">📸 Real photo</button>
           </div>
         </div>
 
@@ -798,8 +816,23 @@
         question: "Why use a different password for each account?",
         acceptedAnswers: ["avoid", "hacking", "multiple accounts"],
         displayAnswer: "To avoid one hack affecting multiple accounts"
+      },
+
+      /* AI / NOT AI QUESTIONS */
+      {
+        kind: "ai",
+        question: "Is this image AI-generated or a real photo?",
+        imageSrc: "macron-c-darko-vojinovic-ap-sipa.webp", // Make sure this file exists in the same folder
+        isAI: false                     // This one is NOT AI, it's a real photo
+      },
+      {
+        kind: "ai",
+        question: "Is this image AI-generated or a real photo?",
+        imageSrc: "Pictures/photos_ia_643ff84398ad0.jpg", // Make sure this file exists in the same folder
+        isAI: true                     // This one is NOT AI, it's a real photo
       }
     ];
+
 
     let mode = "bonus";
     let currentQuestion = null;
@@ -808,7 +841,7 @@
     const quizSection = document.getElementById("quizSection");
     const questionCard = document.getElementById("questionCard");
     const resultCard = document.getElementById("resultCard");
-    const rulesBox = document.getElementById("rulesBox"); // 👈 récupère le bouton règles
+    const rulesBox = document.getElementById("rulesBox");
 
     const questionTypeTagEl = document.getElementById("questionTypeTag");
     const questionTextEl = document.getElementById("questionText");
@@ -816,6 +849,7 @@
 
     const quizAnswerArea = document.getElementById("quizAnswerArea");
     const tfAnswerArea = document.getElementById("tfAnswerArea");
+    const aiAnswerArea = document.getElementById("aiAnswerArea");
     const simpleAnswerArea = document.getElementById("simpleAnswerArea");
 
     const optionAEl = document.getElementById("optionA");
@@ -823,6 +857,9 @@
     const optionCEl = document.getElementById("optionC");
 
     const answerInputEl = document.getElementById("answerInput");
+
+    const aiImageWrapper = document.getElementById("aiImageWrapper");
+    const aiImageEl = document.getElementById("aiImage");
 
     const resultMessageEl = document.getElementById("resultMessage");
     const resultModeTextEl = document.getElementById("resultModeText");
@@ -841,7 +878,7 @@
       mode = selectedMode;
       modeSection.style.display = "none";
       quizSection.style.display = "block";
-      if (rulesBox) rulesBox.style.display = "none"; // 👈 cache le bouton règles
+      if (rulesBox) rulesBox.style.display = "none";
       newRandomQuestion();
     }
 
@@ -853,7 +890,9 @@
 
       quizAnswerArea.style.display = "none";
       tfAnswerArea.style.display = "none";
+      aiAnswerArea.style.display = "none";
       simpleAnswerArea.style.display = "none";
+      aiImageWrapper.style.display = "none";
 
       if (currentQuestion.kind === "quiz") {
         questionTypeTagEl.textContent = "Quiz • A, B or C";
@@ -867,6 +906,14 @@
         questionTypeTagEl.textContent = "True / False";
         questionNoteEl.textContent = "Pick True or False.";
         tfAnswerArea.style.display = "block";
+      } else if (currentQuestion.kind === "ai") {
+        questionTypeTagEl.textContent = "AI or not AI";
+        questionNoteEl.textContent = "Decide if this image is AI-generated or a real photo.";
+        aiAnswerArea.style.display = "block";
+        if (currentQuestion.imageSrc) {
+          aiImageEl.src = currentQuestion.imageSrc;
+          aiImageWrapper.style.display = "block";
+        }
       } else {
         questionTypeTagEl.textContent = "Simple question";
         questionNoteEl.textContent = "Type your answer in a few words.";
@@ -885,6 +932,10 @@
 
     function answerTF(boolValue) {
       checkAnswer({ type: "tf", userBool: boolValue });
+    }
+
+    function answerAI(isAI) {
+      checkAnswer({ type: "ai", userIsAI: isAI });
     }
 
     function answerSimple() {
@@ -908,6 +959,9 @@
       } else if (currentQuestion.kind === "tf") {
         isCorrect = payload.userBool === currentQuestion.correctBool;
         correctText = currentQuestion.correctBool ? "True" : "False";
+      } else if (currentQuestion.kind === "ai") {
+        isCorrect = payload.userIsAI === currentQuestion.isAI;
+        correctText = currentQuestion.isAI ? "AI-generated" : "Real photo";
       } else if (currentQuestion.kind === "simple") {
         const user = normalize(payload.userText);
         const accepted = currentQuestion.acceptedAnswers.map(a =>
@@ -921,7 +975,7 @@
       if (mode === "bonus") {
         modeText = isCorrect
           ? "Well done, you may choose any tile you want!"
-          : "Loser, the bonus stays here.";
+          : "Too bad, the bonus stays on this tile.";
       } else {
         modeText = isCorrect
           ? "Lucky this time, but I’ll get you next time!"
