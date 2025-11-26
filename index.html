@@ -231,6 +231,43 @@
       text-align: center;
     }
 
+    /* RESULT + HISTORY LAYOUT */
+    .results-wrapper {
+      display: none; /* shown only when a result is ready */
+      gap: 16px;
+      align-items: stretch;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .results-wrapper .card {
+      flex: 1 1 0;
+    }
+
+    .history-card {
+      max-width: 260px;
+    }
+
+    #malusList {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    #malusList li + li {
+      margin-top: 6px;
+      border-top: 1px solid rgba(255,244,229,0.25);
+      padding-top: 6px;
+    }
+
+    .history-empty {
+      font-size: 0.9rem;
+      text-align: center;
+      color: var(--cream-soft);
+    }
+
     /* RULES BUTTON (PDF) */
     .rules-box {
       position: fixed;
@@ -332,6 +369,10 @@
       .correct-answer {
         font-size: 0.9rem;
       }
+
+      .history-card {
+        max-width: none;
+      }
     }
   </style>
 </head>
@@ -419,15 +460,25 @@
         </div>
       </div>
 
-      <!-- RESULT SCREEN -->
-      <div class="card" id="resultCard" style="display:none;">
-        <div class="tag">Result</div>
-        <div id="resultMessage" class="feedback"></div>
-        <div id="resultModeText" class="feedback"></div>
-        <div id="resultCorrectAnswer" class="correct-answer"></div>
+      <!-- RESULT + HISTORY -->
+      <div class="results-wrapper" id="resultsWrapper">
+        <!-- RESULT SCREEN -->
+        <div class="card" id="resultCard">
+          <div class="tag">Result</div>
+          <div id="resultMessage" class="feedback"></div>
+          <div id="resultModeText" class="feedback"></div>
+          <div id="resultCorrectAnswer" class="correct-answer"></div>
 
-        <div class="actions">
-          <button class="btn-secondary" onclick="newRandomQuestion()">🎲 New question</button>
+          <div class="actions">
+            <button class="btn-secondary" onclick="newRandomQuestion()">🎲 New question</button>
+          </div>
+        </div>
+
+        <!-- MALUS HISTORY -->
+        <div class="card history-card" id="malusHistoryCard">
+          <div class="tag">Malus history</div>
+          <div id="malusEmpty" class="history-empty">No malus yet.</div>
+          <ul id="malusList"></ul>
         </div>
       </div>
     </div>
@@ -822,24 +873,32 @@
       {
         kind: "ai",
         question: "Is this image AI-generated or a real photo?",
-        imageSrc: "macron-c-darko-vojinovic-ap-sipa.webp", // Make sure this file exists in the same folder
-        isAI: false                     // This one is NOT AI, it's a real photo
+        imageSrc: "macron-c-darko-vojinovic-ap-sipa.webp",
+        isAI: false
       },
       {
         kind: "ai",
         question: "Is this image AI-generated or a real photo?",
-        imageSrc: "photos_ia_643ff84398ad0.jpg", // Make sure this file exists in the same folder
-        isAI: true                     // This one is NOT AI, it's a real photo
+        imageSrc: "photos_ia_643ff84398ad0.jpg",
+        isAI: true
       }
     ];
 
+    // Random malus sentences (used only in MALUS mode)
+    const malusPool = [
+      "Well done, you’ve just lost one space.",
+      "Great! Turn around and go back to your previous space.",
+      "Too bad, you have to skip your next turn."
+    ];
 
     let mode = "bonus";
     let currentQuestion = null;
+    let malusHistory = [];
 
     const modeSection = document.getElementById("modeSection");
     const quizSection = document.getElementById("quizSection");
     const questionCard = document.getElementById("questionCard");
+    const resultsWrapper = document.getElementById("resultsWrapper");
     const resultCard = document.getElementById("resultCard");
     const rulesBox = document.getElementById("rulesBox");
 
@@ -865,6 +924,10 @@
     const resultModeTextEl = document.getElementById("resultModeText");
     const resultCorrectAnswerEl = document.getElementById("resultCorrectAnswer");
 
+    const malusHistoryCard = document.getElementById("malusHistoryCard");
+    const malusEmptyEl = document.getElementById("malusEmpty");
+    const malusListEl = document.getElementById("malusList");
+
     function normalize(str) {
       return str
         .toString()
@@ -876,6 +939,13 @@
 
     function startGame(selectedMode) {
       mode = selectedMode;
+
+      // BONUS mode: clear and hide malus history (no storage)
+      if (mode === "bonus") {
+        malusHistory = [];
+        renderMalusHistory();        // va afficher "No malus yet."
+      }
+
       modeSection.style.display = "none";
       quizSection.style.display = "block";
       if (rulesBox) rulesBox.style.display = "none";
@@ -923,7 +993,7 @@
       }
 
       questionCard.style.display = "block";
-      resultCard.style.display = "none";
+      resultsWrapper.style.display = "none";
     }
 
     function answerQuiz(optionLetter) {
@@ -945,6 +1015,24 @@
         return;
       }
       checkAnswer({ type: "simple", userText: raw });
+    }
+
+    function renderMalusHistory() {
+      if (!malusHistory.length) {
+        malusEmptyEl.style.display = "block";
+        malusListEl.innerHTML = "";
+        return;
+      }
+
+      malusEmptyEl.style.display = "none";
+      malusListEl.innerHTML = "";
+
+      // show newest first
+      malusHistory.slice().reverse().forEach((text) => {
+        const li = document.createElement("li");
+        li.textContent = text;
+        malusListEl.appendChild(li);
+      });
     }
 
     function checkAnswer(payload) {
@@ -972,14 +1060,26 @@
       }
 
       let modeText = "";
+
       if (mode === "bonus") {
+        // In BONUS mode we never use or show malus history
         modeText = isCorrect
           ? "Well done, you may choose any tile you want!"
           : "Too bad, the bonus stays on this tile.";
+        malusHistoryCard.style.display = "none";
       } else {
-        modeText = isCorrect
-          ? "Lucky this time, but I’ll get you next time!"
-          : "You lose one of your tiles, shame!";
+        // MALUS mode
+        if (isCorrect) {
+          modeText = "Lucky this time, but I’ll get you next time!";
+        } else {
+          // MALUS + wrong answer → random malus + history
+          const randomIndex = Math.floor(Math.random() * malusPool.length);
+          const malusSentence = malusPool[randomIndex];
+          modeText = malusSentence;
+          malusHistory.push(malusSentence);
+          renderMalusHistory();
+        }
+        malusHistoryCard.style.display = "block";
       }
 
       resultMessageEl.textContent = isCorrect
@@ -990,7 +1090,7 @@
         "Correct answer: " + correctText;
 
       questionCard.style.display = "none";
-      resultCard.style.display = "block";
+      resultsWrapper.style.display = "flex";
     }
   </script>
 
